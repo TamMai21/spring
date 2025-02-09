@@ -1,4 +1,4 @@
-package vn.hoidanit.utils;
+package vn.hoidanit.jobhunter.utils;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
@@ -29,14 +29,14 @@ public class FormatRestResponse implements ResponseBodyAdvice<Object> {
 
         RestResponse<Object> res = new RestResponse<Object>();
         res.setStatusCode(status);
+        System.out.println(">>>>status: " + status);
 
         if (body instanceof String) {
             return body;
         }
 
         if (status >= 400) {
-            res.setError("FAILED");
-            res.setMessage(body);
+            return body;
         } else {
             res.setData(body);
             res.setMessage("SUCCESS");

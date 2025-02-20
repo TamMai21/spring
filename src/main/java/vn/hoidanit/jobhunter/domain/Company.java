@@ -2,14 +2,10 @@ package vn.hoidanit.jobhunter.domain;
 
 import java.time.Instant;
 
-import org.hibernate.annotations.NotFound;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -22,49 +18,37 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import vn.hoidanit.jobhunter.utils.SecurityUtils;
-import vn.hoidanit.jobhunter.utils.constant.Gender;
 
 @Entity
-@Table(name = "users")
+@Table(name = "companies")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class Company {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @NotBlank(message = "name is empty")
+    @NotBlank(message = "Name is empty")
     private String name;
 
-    @NotBlank(message = "email is empty")
-    private String email;
-
-    @NotBlank(message = "password is empty")
-    private String password;
-    private int age;
-
-    @Enumerated(EnumType.STRING)
-    private Gender gender;
+    @Column(columnDefinition = "MEDIUMTEXT")
+    private String description;
 
     private String address;
 
-    @Column(columnDefinition = "MEDIUMTEXT")
-    private String refreshToken;
+    private String logo;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss a", timezone = "GMT+7")
     private Instant createdAt;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss a", timezone = "GMT+7")
     private Instant updatedAt;
-    private String createdBy;
-    private String updatedBy;
 
-    @Override
-    public String toString() {
-        return "User [id=" + id + ", name=" + name + ", email=" + email + ", password=" + password + "]";
-    }
+    private String createdBy;
+
+    private String updatedBy;
 
     @PrePersist
     public void handleCreatedAt() {

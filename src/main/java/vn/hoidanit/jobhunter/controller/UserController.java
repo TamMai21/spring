@@ -1,7 +1,11 @@
 package vn.hoidanit.jobhunter.controller;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -11,16 +15,27 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.turkraft.springfilter.boot.Filter;
+
+import jakarta.validation.Valid;
+import vn.hoidanit.jobhunter.domain.Company;
 import vn.hoidanit.jobhunter.domain.User;
+import vn.hoidanit.jobhunter.domain.dto.ResCreatedUserDTO;
+import vn.hoidanit.jobhunter.domain.dto.ResGetUserDTO;
+import vn.hoidanit.jobhunter.domain.dto.ResUpdatedUserDTO;
+import vn.hoidanit.jobhunter.domain.dto.ResultPaginationDTO;
 import vn.hoidanit.jobhunter.service.UserService;
+import vn.hoidanit.jobhunter.utils.annotation.ApiMessage;
 import vn.hoidanit.jobhunter.utils.error.IdInvalidException;
 
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
+@RequestMapping("/api/v1")
 public class UserController {
 
     private final UserService userService;
@@ -37,30 +52,61 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(listUsers);
     }
 
+    @GetMapping("/users/pages")
+    @ApiMessage("fetch all users")
+    public ResponseEntity<ResultPaginationDTO> getAllUsers(
+            @Filter Specification<User> spec, Pageable pageable) {
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(this.userService.handleGetAllUsersWithPaginate(spec, pageable));
+    }
+
     @GetMapping("/users/{id}")
-    public ResponseEntity<User> getUserByID(@PathVariable("id") long id) throws IdInvalidException {
-        if (id >= 1000) {
-            throw new IdInvalidException("ID ko lon hon 100000w");
-        }
+    @ApiMessage("fetch user bi id")
+    public ResponseEntity<ResGetUserDTO> getUserByID(@PathVariable("id") long id) throws IdInvalidException {
         User user = this.userService.handleFetchUserByID(id);
-        return ResponseEntity.status(HttpStatus.CREATED).body(user);
+        if (user == null) {
+            throw new IdInvalidException("Cannot find user with id " + id);
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(this.userService.convertResGetUserDTO(user));
     }
 
     @PostMapping("/users")
-    public ResponseEntity<User> createNewUser(@RequestBody User user) {
+    @ApiMessage("Create a new user")
+    public ResponseEntity<ResCreatedUserDTO> createNewUser(@Valid @RequestBody User user)
+            throws IdInvalidException {
+        user.setPassword(this.passwordEncoder.encode(user.getPassword()));
+
+        boolean isExist = this.userService.isEmailExist(user.getEmail());
+        if (isExist) {
+            throw new IdInvalidException("Email " + user.getEmail() + " is already exist.");
+        }
+
         user.setPassword(this.passwordEncoder.encode(user.getPassword()));
         User userCreated = this.userService.handleCreateUser(user);
-        return ResponseEntity.status(HttpStatus.OK).body(userCreated);
+
+        return ResponseEntity.status(HttpStatus.OK).body(this.userService.convertToResCreatedUserDTO(userCreated));
     }
 
     @PutMapping("/users")
-    public ResponseEntity<User> updateUser(@RequestBody User user) {
+    public ResponseEntity<ResUpdatedUserDTO> updateUser(@Valid @RequestBody User user) throws IdInvalidException {
+
+        boolean isExist = this.userService.handleFetchUserByID(user.getId()) != null;
+        if (!isExist) {
+            throw new IdInvalidException("Cannot update user with id " + user.getId());
+        }
+
         User userUpdated = this.userService.handleUpdateUser(user);
-        return ResponseEntity.status(HttpStatus.OK).body(userUpdated);
+        return ResponseEntity.status(HttpStatus.OK).body(this.userService.convertResUpdatedUserDTO(userUpdated));
     }
 
     @DeleteMapping("/users/{id}")
-    public ResponseEntity<String> deleteUserByID(@PathVariable("id") long id) {
+    public ResponseEntity<String> deleteUserByID(@PathVariable("id") long id) throws IdInvalidException {
+
+        boolean isExist = this.userService.handleFetchUserByID(id) != null;
+        if (!isExist) {
+            throw new IdInvalidException("Cannot delete user with id " + id);
+        }
         this.userService.handleDeleteUser(id);
         return ResponseEntity.status(HttpStatus.OK).body(id + " deleted");
     }

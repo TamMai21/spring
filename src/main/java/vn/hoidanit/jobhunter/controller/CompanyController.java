@@ -56,20 +56,20 @@ public class CompanyController {
     // // .body(this.companyService.handleGetAllCompaniesWithPaginate(spec));
     // }
 
-    @GetMapping("/companies/pages")
+    @GetMapping("/companies")
     @ApiMessage("fetch all companies")
     public ResponseEntity<ResultPaginationDTO> getAllCompany(
             @Filter Specification<Company> spec, Pageable pageable) {
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(this.companyService.handleGetAllCompaniesWithPaginate(spec, pageable));
+        return ResponseEntity.ok(this.companyService.handleGetAllCompaniesWithPaginate(spec, pageable));
     }
 
-    @GetMapping("/companies/all")
-    public ResponseEntity<List<Company>> getAllCompanyWithPaginate() {
-        // TODO: process POST request
-        return ResponseEntity.status(HttpStatus.CREATED).body(this.companyService.handleGetAllCompanies());
-    }
+    // @GetMapping("/companies")
+    // public ResponseEntity<List<Company>> getAllCompanyWithPaginate() {
+    // // TODO: process POST request
+    // return
+    // ResponseEntity.status(HttpStatus.CREATED).body(this.companyService.handleGetAllCompanies());
+    // }
 
     @GetMapping("/companies/{id}")
     public ResponseEntity<Company> getCompanyByID(@PathVariable long id) {
@@ -96,9 +96,10 @@ public class CompanyController {
     }
 
     @DeleteMapping("/companies/{id}")
-    public ResponseEntity<String> deleteCompanyByID(@PathVariable long id) {
+    public ResponseEntity<Void> deleteCompanyByID(@PathVariable long id) {
         // TODO: process POST request
-        return ResponseEntity.status(HttpStatus.CREATED).body(id + " deleted");
+        this.companyService.handleDeleteCompany(id);
+        return ResponseEntity.ok(null);
     }
 
 }

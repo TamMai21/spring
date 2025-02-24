@@ -54,7 +54,12 @@ public class SecurityConfiguration {
                 .cors(Customizer.withDefaults()) // config cors
                 .authorizeHttpRequests( // cap quyen truy cap
                         authz -> authz
-                                .requestMatchers("/", "/api/v1/login").permitAll() // ai cung vao dc home, login
+                                .requestMatchers("/", "/api/v1/auth/login", "/api/v1/auth/refresh").permitAll() // ai
+                                                                                                                // cung
+                                                                                                                // vao
+                                                                                                                // dc
+                                                                                                                // home,
+                                                                                                                // login
                                 .anyRequest().authenticated()) // con lai phai xac thuc
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults())
                         // bat oauth2 resource server dung jwt lam co che xac thuc (*)
@@ -101,13 +106,13 @@ public class SecurityConfiguration {
         };
     }
 
-    // sau khi decode thanh cong
-    // lay quyen han cua nguoi dung dc truyen len tu token
+    // bean khai bao cho security de lay quyen han cua nguoi dung dc truyen len tu
+    // token theo phan "permission" trong payload trong jwt de nap vao security
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
         grantedAuthoritiesConverter.setAuthorityPrefix("");
-        grantedAuthoritiesConverter.setAuthoritiesClaimName("me"); // claim name ben SecurityUtils
+        grantedAuthoritiesConverter.setAuthoritiesClaimName("permission"); // claim name ben SecurityUtils
 
         JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);

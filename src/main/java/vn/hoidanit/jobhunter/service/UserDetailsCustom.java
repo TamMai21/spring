@@ -21,15 +21,21 @@ public class UserDetailsCustom implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = this.userService.handleGetUserByUsername(username);
-        if (user == null) {
-            throw new UsernameNotFoundException("Username/password không hợp lệ");
-        }
+        try {
+            User user = this.userService.handleGetUserByUsername(username);
+            if (user == null) {
+                throw new UsernameNotFoundException("Username/password không hợp lệ");
+            }
 
-        return new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
-                user.getPassword(),
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
+            return new org.springframework.security.core.userdetails.User(
+                    user.getEmail(),
+                    user.getPassword(),
+                    Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
+        } catch (Exception e) {
+            System.out.println("error at loadUserByUserName: ");
+            e.printStackTrace();
+            return null;
+        }
     }
 
 }

@@ -46,13 +46,13 @@ public class UserController {
         this.passwordEncoder = passwordEncoder;
     }
 
-    @GetMapping("/users/all")
-    public ResponseEntity<List<User>> getAllUser() {
-        List listUsers = this.userService.handleFetchAllUsers();
-        return ResponseEntity.status(HttpStatus.OK).body(listUsers);
-    }
+    // @GetMapping("/users")
+    // public ResponseEntity<List<User>> getAllUser() {
+    // List listUsers = this.userService.handleFetchAllUsers();
+    // return ResponseEntity.status(HttpStatus.OK).body(listUsers);
+    // }
 
-    @GetMapping("/users/pages")
+    @GetMapping("/users")
     @ApiMessage("fetch all users")
     public ResponseEntity<ResultPaginationDTO> getAllUsers(
             @Filter Specification<User> spec, Pageable pageable) {
@@ -75,7 +75,6 @@ public class UserController {
     @ApiMessage("Create a new user")
     public ResponseEntity<ResCreatedUserDTO> createNewUser(@Valid @RequestBody User user)
             throws IdInvalidException {
-        user.setPassword(this.passwordEncoder.encode(user.getPassword()));
 
         boolean isExist = this.userService.isEmailExist(user.getEmail());
         if (isExist) {
@@ -89,26 +88,26 @@ public class UserController {
     }
 
     @PutMapping("/users")
-    public ResponseEntity<ResUpdatedUserDTO> updateUser(@Valid @RequestBody User user) throws IdInvalidException {
+    public ResponseEntity<ResUpdatedUserDTO> updateUser(@RequestBody User user) throws IdInvalidException {
 
-        boolean isExist = this.userService.handleFetchUserByID(user.getId()) != null;
-        if (!isExist) {
+        User userUpdated = this.userService.handleUpdateUser(user);
+
+        if (userUpdated == null) {
             throw new IdInvalidException("Cannot update user with id " + user.getId());
         }
 
-        User userUpdated = this.userService.handleUpdateUser(user);
         return ResponseEntity.status(HttpStatus.OK).body(this.userService.convertResUpdatedUserDTO(userUpdated));
     }
 
     @DeleteMapping("/users/{id}")
-    public ResponseEntity<String> deleteUserByID(@PathVariable("id") long id) throws IdInvalidException {
+    public ResponseEntity<Void> deleteUserByID(@PathVariable("id") long id) throws IdInvalidException {
 
         boolean isExist = this.userService.handleFetchUserByID(id) != null;
         if (!isExist) {
             throw new IdInvalidException("Cannot delete user with id " + id);
         }
         this.userService.handleDeleteUser(id);
-        return ResponseEntity.status(HttpStatus.OK).body(id + " deleted");
+        return ResponseEntity.ok().body(null);
     }
 
 }

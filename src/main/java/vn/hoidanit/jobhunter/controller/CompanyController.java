@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
 import vn.hoidanit.jobhunter.domain.Company;
-import vn.hoidanit.jobhunter.domain.dto.ResultPaginationDTO;
+import vn.hoidanit.jobhunter.domain.response.ResultPaginationDTO;
 import vn.hoidanit.jobhunter.service.CompanyService;
 import vn.hoidanit.jobhunter.utils.annotation.ApiMessage;
 import vn.hoidanit.jobhunter.utils.error.EmptyFieldException;

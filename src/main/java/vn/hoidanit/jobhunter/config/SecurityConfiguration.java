@@ -54,12 +54,13 @@ public class SecurityConfiguration {
                 .cors(Customizer.withDefaults()) // config cors
                 .authorizeHttpRequests( // cap quyen truy cap
                         authz -> authz
-                                .requestMatchers("/", "/api/v1/auth/login", "/api/v1/auth/refresh").permitAll() // ai
-                                                                                                                // cung
-                                                                                                                // vao
-                                                                                                                // dc
-                                                                                                                // home,
-                                                                                                                // login
+                                .requestMatchers("/", "/api/v1/auth/login", "/api/v1/auth/refresh", "/storage/**")
+                                .permitAll() // ai
+                                // cung
+                                // vao
+                                // dc
+                                // home,
+                                // login
                                 .anyRequest().authenticated()) // con lai phai xac thuc
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults())
                         // bat oauth2 resource server dung jwt lam co che xac thuc (*)
